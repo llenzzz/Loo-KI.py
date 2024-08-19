@@ -2,7 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-def get_virustotalkey(index):
+def get_virustotal_api_key(index):
     key = os.getenv(f'VIRUSTOTAL_API_{index+1}')
     if key is None:
         return None, None
@@ -26,4 +26,4 @@ def virustotal(file_hash):
         if response.status_code == 200:
             return response.json()
         else:
-            index, api_key = get_virustotalkey(index)
+            index, api_key = get_virustotal_api_key(index)

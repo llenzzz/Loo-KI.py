@@ -39,18 +39,21 @@ def main():
         sys.exit(1)
     if not args.file and not args.input:
         sys.exit(1)
-    
+
+    ## just testing if magpprint (file and input), and they both do.
+    ## this is only specific for virustotal tho and only for hashes.
+    ## TODO: later on account also for other sites.
+    ## TODO: later on add logic to recognize whether url ba or ip or whatever.
+
     if args.file:
-        ## file input does nothing for now
-        print(f"{args.file}")
+        with open(args.file, "r") as file:
+            hashList = file.readlines()
+        for hash in hashList:
+            print(file_hash.virustotal(hash))
         
     if args.input:
-        ## just testing if magpprint, and it does.
-        ## this is only specific for virustotal tho and only for hashes.
-        ## TODO: later on account also for other sites.
-        ## TODO: later on add logic to recognize whether url ba or ip.
-        test = file_hash.virustotal(args.input)
-        print(test)
+        item = file_hash.virustotal(args.input)
+        print(item)
     
     if args.output:
         ## file output does nothing for now

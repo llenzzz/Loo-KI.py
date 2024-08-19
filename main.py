@@ -1,6 +1,7 @@
 import argparse
 import sys
 import file_hash
+import whois
 
 def parseArguments():
 
@@ -54,6 +55,10 @@ def main():
     if args.input:
         item = file_hash.virustotal(args.input)
         print(item)
+        domain= whois.whois(args.input)
+        print(domain.domain_name)
+        print(domain.registrar)
+        print(domain.name_servers)
     
     if args.output:
         ## file output does nothing for now

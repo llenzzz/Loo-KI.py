@@ -1,7 +1,13 @@
 import argparse
 import sys
+import re
+
 import file_hash
-import whois
+import url
+
+REG_HASH = r'[a-fA-F0-9]'
+REG_URL = r'.*\..*\.'
+REG_IP = r''
 
 def parseArguments():
 
@@ -21,14 +27,13 @@ def parseArguments():
         type = str
     )
     
-    parser.add_argument (
-        '-o',
-        '--output',
-        help = "Output Filename",
-        type = str,
-        ## ------------ uncomment pag okay na yung file exports pero saka na yun  ------------ ##
-        # required = True
-    )
+    # parser.add_argument (
+    #     '-o',
+    #     '--output',
+    #     help = "Output Filename",
+    #     type = str,
+    #     required = True
+    # )
     
     return parser.parse_args()
 
@@ -41,29 +46,35 @@ def main():
     if not args.file and not args.input:
         sys.exit(1)
 
-    ## just testing if magpprint (file and input), and they both do.
-    ## this is only specific for virustotal tho and only for hashes.
-    ## TODO: later on account also for other sites.
-    ## TODO: later on add logic to recognize whether url ba or ip or whatever.
-
     if args.file:
-        with open(args.file, "r") as file:
-            hashList = file.readlines()
-        for hash in hashList:
-            print(file_hash.virustotal(hash))
-        
-    if args.input:
-        item = file_hash.virustotal(args.input)
-        print(item)
-        domain= whois.whois(args.input)
-        print(domain.domain_name)
-        print(domain.registrar)
-        print(domain.name_servers)
-    
-    if args.output:
-        ## file output does nothing for now
-        print(f"{args.output}")
 
+        with open(args.file, "r") as file:
+            itemList = file.readlines()
+        
+        regex = re.compile(REG_HASH)
+        if regex.match(itemList[0]):
+            for item in itemList:
+                print(file_hash.virustotal(item))
+                print(file_hash.hybridanalysis(item))
+
+        regex = re.compile(REG_URL)
+        if regex.match(itemList[0]):
+            for item in itemList:
+                print(url.who_is(item))
+
+    if args.input:
+
+        regex = re.compile(REG_HASH)
+        if regex.match(args.input):
+            print(file_hash.virustotal(args.input))
+            print(file_hash.hybridanalysis(args.input))
+        
+        regex = re.compile(REG_URL)
+        if regex.match(args.input):
+            print(url.who_is(args.input))
+    
+    # if args.output:
+    #     print(f"{args.output}")
 
 if __name__ == "__main__":
     main()

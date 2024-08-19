@@ -15,9 +15,16 @@ python main.py -i <hash>
 
 -------------------------------------
 
-utilizes gitignore to hide .env files locally. for now you SHOULD have a virustotal.env file. content format is as follows:
+utilizes gitignore to hide .env, .txt, and .csv files locally.
 
-VIRUSTOTAL_API_1=<api_key_1>
-VIRUSTOTAL_API_2=<api_key_2>
-VIRUSTOTAL_API_3=<api_key_3>
+for now you SHOULD have a virustotal.env AND a hybridanalysis.env file. content format is as follows:
+
+VIRUSTOTAL_API_1=<api_key_1a>
+VIRUSTOTAL_API_2=<api_key_2a>
+VIRUSTOTAL_API_3=<api_key_3a>
+(and so on..)
+
+HYBRIDANALYSIS_API_1=<api_key_1b>
+HYBRIDANALYSIS_API_2=<api_key_2b>
+HYBRIDANALYSIS_API_3=<api_key_3b>
 (and so on..)

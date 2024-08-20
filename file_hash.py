@@ -8,16 +8,17 @@ def get_api_key(service, index):
         return None, None
     else:
         return index+1, key
-    
+
 def api_request(service, file_hash, url, headers, data=None):
     load_dotenv(f'{service}.env')
     file_hash = file_hash.strip().lower()
-    
+
     index = 1
     api_key = os.getenv(f'{service.upper()}_API_{index}')
-    
+
     while True:
         if api_key is None:
+            print(f"No API key found for {service}.")
             return None    
 
         if service == "virustotal":
@@ -26,11 +27,13 @@ def api_request(service, file_hash, url, headers, data=None):
         elif service == "hybridanalysis":
             headers.update({'api-key': api_key})
             response = requests.post(url, headers=headers, data=data)
-        
+
         if response.status_code == 200:
             return response.json()
         else:
             index, api_key = get_api_key(service, index)
+            if not api_key:
+                return None
 
 def virustotal(file_hash):
     url = "https://www.virustotal.com/api/v3/files/{file_hash}"

@@ -64,34 +64,19 @@ def dissect_whois_data(whois_data):
         "status": whois_data.status
     }
 
-def load_existing_data(filename):
-    if not os.path.exists(filename):
-        return {}
-
-    existing_data = {}
-    with open(filename, mode='r') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            unique_key = row.get('vt_hash') or row.get('ha_hash') or row.get('domain_name')  # Use the appropriate key
-            if unique_key:
-                existing_data[unique_key] = row
-    return existing_data
-
 def save_to_csv(data, filename):
-    existing_data = load_existing_data(filename)
-    unique_key = data.get('vt_hash') or data.get('ha_hash') or data.get('domain_name')
-
-    if unique_key:
-        existing_data[unique_key] = data
-
-    headers = sorted(existing_data[next(iter(existing_data))].keys()) if existing_data else sorted(data.keys())
-    with open(filename, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=headers)
-        writer.writeheader()
-        for row in existing_data.values():
-            writer.writerow(row)
+    file_exists = os.path.exists(filename)
+    headers = sorted(data.keys())
     
-    print(f"Data has been written to {filename}.")
+    with open(filename, 'a', newline='') as csvfile: 
+        writer = csv.DictWriter(csvfile, fieldnames=headers)
+        
+        if not file_exists:
+            writer.writeheader()
+        
+        writer.writerow(data)
+    
+    print(f"Data has been appended to {filename}.")
 
 def save_hash(vt_data, ha_data, filename):
     vt_ioc = dissect_vt_data(vt_data)

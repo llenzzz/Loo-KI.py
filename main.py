@@ -6,7 +6,7 @@ import file_hash
 import url
 
 REG_HASH = r'[a-fA-F0-9]'
-REG_URL = r'.*\..*\.'
+REG_URL = r'^(https?://)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(/.*)?$'
 REG_IP = r''
 
 def parseArguments():
@@ -71,6 +71,7 @@ def main():
         
         regex = re.compile(REG_URL)
         if regex.match(args.input):
+            print(file_hash.virustotal(args.input))
             print(url.who_is(args.input))
     
     # if args.output:

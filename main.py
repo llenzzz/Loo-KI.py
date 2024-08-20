@@ -60,6 +60,7 @@ def main():
         regex = re.compile(REG_URL)
         if regex.match(itemList[0]):
             for item in itemList:
+                print(url.virustotal(item))
                 print(url.who_is(item))
 
     if args.input:

@@ -19,7 +19,9 @@ def api_request(service, ipAddr, url, headers, data=None):
     while True:
         if api_key is None:
             return None    
-
+        if service == "virustotal":
+            headers.update({"x-apikey": api_key})
+            response = requests.get(url,headers=headers)
         if service == "geolocator":
             response = requests.get(f"https://api.ipgeolocation.io/ipgeo?apiKey={api_key}&ip={ipAddr}")
         if response.status_code == 200:
@@ -30,6 +32,14 @@ def api_request(service, ipAddr, url, headers, data=None):
 def geolocator(ipAddr):
     sys.stdout.reconfigure(encoding='utf-8')
     return api_request("geolocator", ipAddr, url='', headers='')
+
+
+def virustotal(ipAddr):
+    url = f"https://www.virustotal.com/api/v3/ip-address/{ipAddr}"
+    headers = {
+        "x-apikey": "your_api_key_here"
+    }
+    return api_request("virustotal", ipAddr, url, headers)
 
 def dnslytics(ip):
     response=requests.get(f"https://freeapi.dnslytics.net/v1/ip2asn/{ip}")

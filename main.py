@@ -4,10 +4,10 @@ import re
 import file_hash
 import url
 import export_csv
-
-REG_HASH = r'[a-fA-F0-9]'
+import ip
+REG_HASH = r'\b[a-fA-F0-9]{32}\b|\b[a-fA-F0-9]{40}\b|\b[a-fA-F0-9]{64}\b'
 REG_URL = r'^(https?://)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(/.*)?$'
-REG_IP = r''
+REG_IP = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
 
 def parseArguments():
     parser = argparse.ArgumentParser()
@@ -64,18 +64,27 @@ def main():
 
     elif args.input:
         input_data = args.input.strip()
-        
         regex = re.compile(REG_HASH)
         if regex.match(input_data):
+            print("Hash")
             process_hash(input_data)
             print(file_hash.virustotal(input_data))
             print(file_hash.hybridanalysis(input_data))
 
         regex = re.compile(REG_URL)
         if regex.match(input_data):
+            print("URL")
             process_url(input_data)
             print(url.virustotal(input_data))
             print(url.who_is(input_data))
+        
+        regex = re.compile(REG_IP)
+        if regex.match(input_data):
+            print("IP address")
+            print( ip.virustotal(input_data))
+            print( url.who_is(input_data))
+            print(ip.geolocator(input_data))
+            print(ip.dnslytics(input_data))
 
 if __name__ == "__main__":
     main()

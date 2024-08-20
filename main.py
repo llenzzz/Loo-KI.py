@@ -35,9 +35,10 @@ def process_hash(item):
         export_csv.save_hash(vt_data, ha_data, f"Hash_Lookups.csv")
 
 def process_url(item):
+    vt_data = url.virustotal(item)
     whois_data = url.who_is(item)
-    if whois_data:
-        export_csv.save_url(whois_data, f"URL_Lookups.csv")
+    if whois_data or vt_data:
+        export_csv.save_url(whois_data,vt_data, f"URL_Lookups.csv")
 
 def main():
     args = parseArguments()
@@ -65,31 +66,16 @@ def main():
         input_data = args.input.strip()
         
         regex = re.compile(REG_HASH)
-        if regex.match(itemList[0]):
-            for item in itemList:
-                print(file_hash.virustotal(item))
-                print(file_hash.hybridanalysis(item))
+        if regex.match(input_data):
+            process_hash(input_data)
+            print(file_hash.virustotal(input_data))
+            print(file_hash.hybridanalysis(input_data))
 
         regex = re.compile(REG_URL)
-        if regex.match(itemList[0]):
-            for item in itemList:
-                print(url.virustotal(item))
-                print(url.who_is(item))
-
-    if args.input:
-
-        regex = re.compile(REG_HASH)
-        if regex.match(args.input):
-            print(file_hash.virustotal(args.input))
-            print(file_hash.hybridanalysis(args.input))
-        
-        regex = re.compile(REG_URL)
-        if regex.match(args.input):
-            print(url.virustotal(args.input))
-            print(url.who_is(args.input))
-    
-    # if args.output:
-    #     print(f"{args.output}")
+        if regex.match(input_data):
+            process_url(input_data)
+            print(url.virustotal(input_data))
+            print(url.who_is(input_data))
 
 if __name__ == "__main__":
     main()

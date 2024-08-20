@@ -84,6 +84,8 @@ def save_hash(vt_data, ha_data, filename):
     merged_data = {**vt_ioc, **ha_ioc}
     save_to_csv(merged_data, filename)
 
-def save_url(whois_data, filename):
-    dissected_data = dissect_whois_data(whois_data)
-    save_to_csv(dissected_data, filename)
+def save_url(whois_data,vt_data, filename):
+    vt_ioc = dissect_vt_data(vt_data)
+    whois_ioc = dissect_whois_data(whois_data)
+    merged_data = {**vt_ioc, **whois_ioc}
+    save_to_csv(merged_data, filename)

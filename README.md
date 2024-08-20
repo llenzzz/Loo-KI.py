@@ -10,10 +10,10 @@ pip install python-whois
 ```
 
 ### Components
-api_manager: checks for usable api_key from specified .env file. returns usable api.
-file_hash: retrieves usable api via api_manager import. returns hash lookup results.
-url: retrieves usable api via api_manager import. returns URL lookup results.
-main.py: checks for URL and file hashes and invokes its saving into CSV. eventually will also support ips. pass the necessary args to execute.
+1. api_manager: checks for usable api_key from specified .env file. returns usable api.
+2. file_hash: retrieves usable api via api_manager import. returns hash lookup results.
+3. url: retrieves usable api via api_manager import. returns URL lookup results.
+4. main.py: checks for URL and file hashes and invokes its saving into CSV. eventually will also support ips. pass the necessary args to execute.
 
 ## Usage
 

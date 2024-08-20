@@ -71,7 +71,7 @@ def main():
         
         regex = re.compile(REG_URL)
         if regex.match(args.input):
-            print(file_hash.virustotal(args.input))
+            print(url.virustotal(args.input))
             print(url.who_is(args.input))
     
     # if args.output:

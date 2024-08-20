@@ -10,7 +10,13 @@ def parse_date(timestamp):
             return datetime.utcfromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M:%S')
         except ValueError:
             return timestamp
-    return None
+    elif isinstance(timestamp, list):  # Handle list of timestamps
+        return ', '.join([parse_date(ts.timestamp() if isinstance(ts, datetime) else ts) for ts in timestamp if ts is not None])
+    elif isinstance(timestamp, datetime):
+        return timestamp.strftime('%Y-%m-%d %H:%M:%S')
+    elif timestamp is None:
+        return ''
+    return str(timestamp)
 
 def dissect_vt_data(vt_data):
     if not vt_data or 'data' not in vt_data:
@@ -52,8 +58,8 @@ def dissect_whois_data(whois_data):
     return {
         "domain_name": whois_data.domain_name,
         "registrar": whois_data.registrar,
-        "creation_date": parse_date(whois_data.creation_date.timestamp() if whois_data.creation_date else None),
-        "expiration_date": parse_date(whois_data.expiration_date.timestamp() if whois_data.expiration_date else None),
+        "creation_date": parse_date(whois_data.creation_date),
+        "expiration_date": parse_date(whois_data.expiration_date),
         "name_servers": ','.join(whois_data.name_servers) if whois_data.name_servers else None,
         "status": whois_data.status
     }

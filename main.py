@@ -38,7 +38,7 @@ def process_url(item):
     vt_data = url.virustotal(item)
     whois_data = url.who_is(item)
     if whois_data or vt_data:
-        export_csv.save_url(whois_data,vt_data, f"URL_Lookups.csv")
+        export_csv.save_url(vt_data, whois_data, f"URL_Lookups.csv")
 
 def main():
     args = parseArguments()

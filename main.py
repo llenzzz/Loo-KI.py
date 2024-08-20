@@ -35,9 +35,9 @@ def process_hash(item):
         export_csv.save_hash(vt_data, ha_data, f"Hash_Lookups.csv")
 
 def process_url(item):
-    url_data = url.who_is(item)
+    whois_data = url.who_is(item)
     if whois_data:
-        export_csv.save_url(url_data, f"URL_Lookups.csv")
+        export_csv.save_url(whois_data, f"URL_Lookups.csv")
 
 def main():
     args = parseArguments()

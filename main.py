@@ -31,14 +31,22 @@ def parseArguments():
 def process_hash(item):
     vt_data = file_hash.virustotal(item)
     ha_data = file_hash.hybridanalysis(item)
-    if vt_data or ha_data:
-        export_csv.save_hash(vt_data, ha_data, f"Hash_Lookups.csv")
+    mb_data = file_hash.malwarebazaar(item)
+    if vt_data or ha_data or mb_data:
+        export_csv.save_hash(vt_data, ha_data, mb_data, f"Hash_Lookups.csv")
 
 def process_url(item):
     vt_data = url.virustotal(item)
     whois_data = url.who_is(item)
     if whois_data or vt_data:
         export_csv.save_url(vt_data, whois_data, f"URL_Lookups.csv")
+        
+def process_ip(item):
+    geo_data = ip.geolocator(item)
+    vt_data = ip.virustotal(item)
+    dns_data = ip.dnslytics(item)
+    if geo_data or vt_data or dns_data:
+        export_csv.save_ip(geo_data, vt_data, dns_data, f"IP_Lookups.csv")
 
 def main():
     args = parseArguments()
@@ -50,6 +58,7 @@ def main():
 
     regex_hash = re.compile(REG_HASH)
     regex_url = re.compile(REG_URL)
+    regex_ip = re.compile(REG_IP)
 
     if args.file:
         with open(args.file, "r") as file:
@@ -61,6 +70,8 @@ def main():
                 process_hash(item)
             elif regex_url.match(item):
                 process_url(item)
+            elif regex_ip.match(item):
+                process_ip(item)
 
     elif args.input:
         input_data = args.input.strip()
@@ -71,20 +82,21 @@ def main():
             # process_hash(input_data)
             # print(file_hash.virustotal(input_data))
             # print(file_hash.hybridanalysis(input_data))
-            print(file_hash.malwarebazaar(input_data))
+            # print(file_hash.malwarebazaar(input_data))
 
         regex = re.compile(REG_URL)
         if regex.match(input_data):
             print("URL")
-            process_url(input_data)
+            # process_url(input_data)
             print(url.virustotal(input_data))
             print(url.who_is(input_data))
         
         regex = re.compile(REG_IP)
         if regex.match(input_data):
             print("IP address")
-            print( ip.virustotal(input_data))
-            print( url.who_is(input_data))
+            # process_ip(input_data)
+            print(ip.virustotal(input_data))
+            print(url.who_is(input_data))
             print(ip.geolocator(input_data))
             print(ip.dnslytics(input_data))
 

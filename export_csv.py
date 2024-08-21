@@ -38,6 +38,20 @@ def dissect_ha_data(ha_data):
         "ha_submit_name": ha_submit_name
     }
 
+def dissect_mb_data(mb_data):
+    if not mb_data or 'data' not in mb_data:
+        return {}
+
+    result = mb_data['data'][0]
+
+    return {
+        "mb_hash": result.get('sha256_hash', ''),
+        "mb_file_name": result.get('file_name', ''),
+        "mb_file_type": result.get('file_type', ''),
+        "mb_first_submission_date": parse_date(result.get('first_seen', '')),
+        "mb_tags": ', '.join(result.get('tags', []))
+    }
+    
 def dissect_vt_data(vt_data):
     if not vt_data or 'data' not in vt_data:
         return {}
@@ -55,7 +69,7 @@ def dissect_vt_data(vt_data):
         "vt_antiy_result": attributes.get('last_analysis_results', {}).get('Antiy-AVL', {}).get('result'),
         "vt_antiy_category": attributes.get('last_analysis_results', {}).get('Antiy-AVL', {}).get('category')
     }
-
+    
 def dissect_vt_url_data(vt_url_data):
     if not vt_url_data or 'data' not in vt_url_data:
         return {}
@@ -74,7 +88,7 @@ def dissect_vt_url_data(vt_url_data):
         "url": attributes.get("url", ''),
         "last_final_url": attributes.get("last_final_url", '')
     }
-
+    
 def dissect_whois_data(whois_data):
     if not whois_data:
         return {}
@@ -106,14 +120,18 @@ def save_to_csv(data, filename):
 
     print(f"Data has been appended to {filename}.")
 
-def save_hash(vt_data, ha_data, filename):
+def save_hash(vt_data, ha_data, mb_data, filename):
     vt_ioc = dissect_vt_data(vt_data)
     ha_ioc = dissect_ha_data(ha_data)
+    mb_ioc = dissect_mb_data(mb_data)
+    
     merged_data = {
         "vt_hash": vt_ioc.get("vt_hash"),
         "ha_hash": ha_ioc.get("ha_hash"),
+        "mb_hash": mb_ioc.get("mb_hash"),
         **vt_ioc,
-        **ha_ioc
+        **ha_ioc,
+        **mb_ioc
     }
 
     if not merged_data:

@@ -79,11 +79,11 @@ def main():
         if regex.match(input_data):
             input_data = input_data.lower()
             # process_hash(input_data)
-            # print(file_hash.virustotal(input_data))
-            # print(file_hash.hybridanalysis(input_data))
-            # print(file_hash.malwarebazaar(input_data))
-            # print(file_hash.alienvault(input_data))
-            # print(file_hash.malshare(input_data))
+            print(file_hash.virustotal(input_data))
+            print(file_hash.hybridanalysis(input_data))
+            print(file_hash.malwarebazaar(input_data))
+            print(file_hash.alienvault(input_data))
+            print(file_hash.malshare(input_data))
             print(file_hash.metadefender(input_data))
 
         regex = re.compile(REG_URL)
@@ -94,6 +94,7 @@ def main():
         
         regex = re.compile(REG_IP)
         if regex.match(input_data):
+            process_ip(input_data)
             print( ip.virustotal(input_data))
             print( url.who_is(input_data))
             print(ip.geolocator(input_data))

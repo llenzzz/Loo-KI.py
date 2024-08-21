@@ -205,7 +205,7 @@ def save_ip(geo_data, vt_ip_data, dnslytics_data, filename):
     dnslytics_ioc = dissect_dnslytics_data(dnslytics_data)
     
     merged_data = {**geo_ioc, **vt_ip_ioc, **dnslytics_ioc}
-    print(dnslytics_ioc)
+
     if not merged_data:
         print("No data to save.")
         return

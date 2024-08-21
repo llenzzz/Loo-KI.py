@@ -52,9 +52,7 @@ def who_is(url):
 
 #TODO export_csv functionality, figure out how to do csv stuff depending on whether it is a host or url ill commennt down below this the json output pag-host and url. 
 #Host output basically occurs pag walang specific url like for example the one I used below "https://voineasa.ro/contents/Tilbjeligere.dwp", this will be run as a url, however if you run it as
-#voineasa.ro it will try to find all possible urls that used this host 
-
-
+#voineasa.ro it will try to find all possible urls that used this host and return what url request would respond per each url available 
 
 # URL output
 # {'query_status': 'ok', 'id': '3120212', 'urlhaus_reference': 'https://urlhaus.abuse.ch/url/3120212/', 'url': 'https://voineasa.ro/contents/Tilbjeligere.dwp', 

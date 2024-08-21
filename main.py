@@ -66,10 +66,12 @@ def main():
         input_data = args.input.strip()
         regex = re.compile(REG_HASH)
         if regex.match(input_data):
+            input_data = input_data.lower()
             print("Hash")
-            process_hash(input_data)
-            print(file_hash.virustotal(input_data))
-            print(file_hash.hybridanalysis(input_data))
+            # process_hash(input_data)
+            # print(file_hash.virustotal(input_data))
+            # print(file_hash.hybridanalysis(input_data))
+            print(file_hash.malwarebazaar(input_data))
 
         regex = re.compile(REG_URL)
         if regex.match(input_data):

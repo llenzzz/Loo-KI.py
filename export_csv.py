@@ -17,6 +17,8 @@ def parse_date(timestamp):
         return timestamp.strftime('%Y-%m-%d %H:%M:%S')
     return str(timestamp)
 
+# Hash Lookup Functions:
+
 def dissect_ha_data(ha_data):
     if not ha_data or len(ha_data) == 0:
         return {}
@@ -70,6 +72,8 @@ def dissect_vt_data(vt_data):
         "vt_antiy_category": attributes.get('last_analysis_results', {}).get('Antiy-AVL', {}).get('category')
     }
     
+# URL Lookup Functions:    
+    
 def dissect_vt_url_data(vt_url_data):
     if not vt_url_data or 'data' not in vt_url_data:
         return {}
@@ -101,6 +105,50 @@ def dissect_whois_data(whois_data):
         "name_servers": ','.join(whois_data.get('name_servers', [])) if whois_data.get('name_servers') else '',
         "status": whois_data.get('status', '')
     }
+
+# IP Lookup Functions:
+
+def dissect_geolocator_data(geo_data):
+    if not geo_data:
+        return {}
+
+    return {
+        "geo_ip": geo_data.get('ip', ''),
+        "geo_country_name": geo_data.get('country_name', ''),
+        "geo_region_name": geo_data.get('state_prov', ''),
+        "geo_city": geo_data.get('city', ''),
+        "geo_isp": geo_data.get('isp', ''),
+        "geo_organization": geo_data.get('organization', ''),
+        "geo_as": geo_data.get('asn', ''),
+        "geo_timezone": geo_data.get('time_zone', {}).get('name', '')
+    }
+
+def dissect_virustotal_ip_data(vt_ip_data):
+    if not vt_ip_data or 'data' not in vt_ip_data:
+        return {}
+
+    attributes = vt_ip_data['data']['attributes']
+
+    return {
+        "vt_ip_address": vt_ip_data['data'].get('id', ''),
+        "vt_country": attributes.get('country', ''),
+        "vt_reputation": attributes.get('reputation', ''),
+        "vt_malicious_votes": attributes.get('total_votes', {}).get('malicious', 0),
+        "vt_harmless_votes": attributes.get('total_votes', {}).get('harmless', 0),
+        "vt_last_analysis_stats": attributes.get('last_analysis_stats', {}),
+        "vt_last_analysis_date": parse_date(attributes.get('last_analysis_date'))
+    }
+
+def dissect_dnslytics_data(dnslytics_data):
+    if not dnslytics_data:
+        return {}
+
+    return {
+        "dns_ip": dnslytics_data.get('ip', ''),
+        "dns_asn": dnslytics_data.get('asn', '')
+    }
+
+# CSV Functions:
 
 def save_to_csv(data, filename):
     file_exists = os.path.exists(filename)
@@ -145,6 +193,19 @@ def save_url(vt_url_data, whois_data, filename):
     whois_ioc = dissect_whois_data(whois_data)
     merged_data = {**vt_url_ioc, **whois_ioc}
 
+    if not merged_data:
+        print("No data to save.")
+        return
+
+    save_to_csv(merged_data, filename)
+    
+def save_ip(geo_data, vt_ip_data, dnslytics_data, filename):
+    geo_ioc = dissect_geolocator_data(geo_data)
+    vt_ip_ioc = dissect_virustotal_ip_data(vt_ip_data)
+    dnslytics_ioc = dissect_dnslytics_data(dnslytics_data)
+    
+    merged_data = {**geo_ioc, **vt_ip_ioc, **dnslytics_ioc}
+    print(dnslytics_ioc)
     if not merged_data:
         print("No data to save.")
         return

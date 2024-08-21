@@ -38,10 +38,8 @@ def geolocator(ipAddr):
     return api_request("geolocator", ipAddr, url='', headers={})
 
 def virustotal(ipAddr):
-    url = f"https://www.virustotal.com/api/v3/ip-address/{ipAddr}"
-    headers = {
-        "x-apikey": "your_api_key_here"
-    }
+    url = f"https://www.virustotal.com/api/v3/ip_addresses/{ipAddr}"
+    headers = {}
     return api_request("virustotal", ipAddr, url, headers)
 
 def dnslytics(ip):

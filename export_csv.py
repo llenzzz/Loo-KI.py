@@ -89,8 +89,7 @@ def dissect_vt_url_data(vt_url_data):
         "vt_url_total_votes_harmless": attributes.get("total_votes", {}).get("harmless", ''),
         "vt_url_total_votes_malicious": attributes.get("total_votes", {}).get("malicious", ''),
         "vt_url_scan_results": attributes.get('last_analysis_results', {}),
-        "url": attributes.get("url", ''),
-        "last_final_url": attributes.get("last_final_url", '')
+        "vt_last_final_url": attributes.get("last_final_url", '')
     }
     
 def dissect_whois_data(whois_data):
@@ -98,12 +97,12 @@ def dissect_whois_data(whois_data):
         return {}
 
     return {
-        "domain_name": whois_data.get('domain_name', ''),
-        "registrar": whois_data.get('registrar', ''),
-        "creation_date": parse_date(whois_data.get('creation_date', '')),
-        "expiration_date": parse_date(whois_data.get('expiration_date', '')),
-        "name_servers": ','.join(whois_data.get('name_servers', [])) if whois_data.get('name_servers') else '',
-        "status": whois_data.get('status', '')
+        "whois_domain_name": whois_data.get('domain_name', ''),
+        "whois_registrar": whois_data.get('registrar', ''),
+        "whois_creation_date": parse_date(whois_data.get('creation_date', '')),
+        "whois_expiration_date": parse_date(whois_data.get('expiration_date', '')),
+        "whois_name_servers": ','.join(whois_data.get('name_servers', [])) if whois_data.get('name_servers') else '',
+        "whois_status": whois_data.get('status', '')
     }
 
 # IP Lookup Functions:
@@ -191,23 +190,42 @@ def save_hash(vt_data, ha_data, mb_data, filename):
 def save_url(vt_url_data, whois_data, filename):
     vt_url_ioc = dissect_vt_url_data(vt_url_data)
     whois_ioc = dissect_whois_data(whois_data)
+
     merged_data = {**vt_url_ioc, **whois_ioc}
 
-    if not merged_data:
+    ordering = [
+        "vt_url_id", "vt_last_final_url",
+        "vt_url_reputation", "vt_url_first_submission_date", "vt_url_last_analysis_date", "vt_url_last_modification_date",
+        "vt_url_total_votes_harmless", "vt_url_total_votes_malicious", "vt_url_scan_results",
+        "whois_domain_name", "whois_registrar", "whois_creation_date", "whois_expiration_date", "whois_name_servers", "whois_status"
+    ]
+    
+    ordered_data = {key: merged_data.get(key) for key in ordering if key in merged_data}
+
+    if not ordered_data:
         print("No data to save.")
         return
 
-    save_to_csv(merged_data, filename)
-    
+    save_to_csv(ordered_data, filename)
+
 def save_ip(geo_data, vt_ip_data, dnslytics_data, filename):
     geo_ioc = dissect_geolocator_data(geo_data)
     vt_ip_ioc = dissect_virustotal_ip_data(vt_ip_data)
     dnslytics_ioc = dissect_dnslytics_data(dnslytics_data)
-    
+
     merged_data = {**geo_ioc, **vt_ip_ioc, **dnslytics_ioc}
 
-    if not merged_data:
+    ordering = [
+        "geo_ip", "vt_ip_address", "dns_ip",
+        "geo_country_name", "vt_country", "geo_region_name", "geo_city", "geo_timezone",
+        "geo_isp", "geo_organization", "geo_as", "dns_asn",
+        "vt_reputation", "vt_malicious_votes", "vt_harmless_votes", "vt_last_analysis_stats", "vt_last_analysis_date"
+    ]
+    
+    ordered_data = {key: merged_data.get(key) for key in ordering if key in merged_data}
+
+    if not ordered_data:
         print("No data to save.")
         return
 
-    save_to_csv(merged_data, filename)
+    save_to_csv(ordered_data, filename)

@@ -112,7 +112,6 @@ def dissect_vt_data(vt_data):
 def dissect_vt_url_data(vt_url_data):
     if not vt_url_data or 'data' not in vt_url_data:
         return {}
-
     attributes = vt_url_data['data']['attributes']
 
     return {
@@ -127,6 +126,22 @@ def dissect_vt_url_data(vt_url_data):
         "vt_last_final_url": attributes.get("last_final_url", '')
     }
     
+def dissect_url_huas_data(url_huas_data):
+    if not url_huas_data:
+        return {}
+    return {
+        'uh_url':url_huas_data.get('url',''),
+        'uh_status':url_huas_data.get('status',''),
+        'uh_host':url_huas_data.get('host',''),
+        'uh_date_added':url_huas_data.get('date_added',''),
+        'uh_threat':url_huas_data.get('threat',''),
+        'uh_blacklists':url_huas_data.get('blacklists',''),
+        'uh_filenames':url_huas_data.get('filenames',''),
+        'uh_file_names':url_huas_data.get('file_names',''),
+        'uh_signature':url_huas_data.get('signature',''),
+    }
+
+
 def dissect_whois_data(whois_data):
     if not whois_data:
         return {}
@@ -242,17 +257,18 @@ def save_hash(vt_data, ha_data, mb_data, av_data, ms_data, md_data, filename):
 
     save_to_csv(ordered_data, filename)
 
-def save_url(vt_url_data, whois_data, filename):
+def save_url(vt_url_data, whois_data,uh_url_data, filename):
     vt_url_ioc = dissect_vt_url_data(vt_url_data)
     whois_ioc = dissect_whois_data(whois_data)
-
-    merged_data = {**vt_url_ioc, **whois_ioc}
+    uh_ioc=dissect_url_huas_data(uh_url_data)
+    merged_data = {**vt_url_ioc, **whois_ioc,**uh_ioc}
 
     ordering = [
         "vt_url_id", "vt_last_final_url",
         "vt_url_reputation", "vt_url_first_submission_date", "vt_url_last_analysis_date", "vt_url_last_modification_date",
         "vt_url_total_votes_harmless", "vt_url_total_votes_malicious", "vt_url_scan_results",
-        "whois_domain_name", "whois_registrar", "whois_creation_date", "whois_expiration_date", "whois_name_servers", "whois_status"
+        "whois_domain_name", "whois_registrar", "whois_creation_date", "whois_expiration_date", "whois_name_servers", "whois_status","uh_url","uh_status","uh_host",
+        "uh_date_added","uh_threat","uh_blacklists","uh_filenames","uh_file_names","uh_signature"
     ]
     
     ordered_data = {key: merged_data.get(key) for key in ordering if key in merged_data}

@@ -82,12 +82,7 @@ def urlHause(url):
     if parsed_url.scheme:
         data = {'url': url}
         response = requests.post('https://urlhaus-api.abuse.ch/v1/url/', data)
-    else:
-        data = {'host': url}
-        response = requests.post('https://urlhaus-api.abuse.ch/v1/host/', data)
-    
+
     response = response.json()
     if response['query_status'] == 'ok':
         return response
-
-print(urlHause("voineasa.ro"))

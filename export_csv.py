@@ -19,6 +19,46 @@ def parse_date(timestamp):
 
 # Hash Lookup Functions:
 
+def dissect_alienvault_data(av_data):
+    if not av_data or 'analysis' not in av_data:
+        return {}
+
+    analysis = av_data['analysis']['info']['results']
+    virustotal = av_data['analysis']['plugins'].get('cuckoo', {}).get('result', {}).get('virustotal', {})
+    
+    return {
+        "av_hash": analysis.get('sha256', ''),
+        "av_file_type": analysis.get('file_type', ''),
+        "av_last_analysis_date": parse_date(virustotal.get('scan_date', '')),
+        "av_total_positives": virustotal.get('positives', 0),
+        "av_total_scans": virustotal.get('total', 0)
+    }
+
+def dissect_malshare_data(ms_data):
+    if not ms_data or 'SHA256' not in ms_data:
+        return {}
+
+    return {
+        "ms_hash": ms_data.get('SHA256', ''),
+        "ms_file_type": ms_data.get('F_TYPE', ''),
+        "ms_filenames": ', '.join(ms_data.get('FILENAMES', []))
+    }
+
+def dissect_metadefender_data(md_data):
+    if not md_data or 'sha256' not in md_data:
+        return {}
+
+    file_info = md_data.get('file_info', {})
+
+    return {
+        "md_hash": md_data.get('sha256', ''),
+        "md_file_type": file_info.get('file_type', ''),
+        "md_file_size": file_info.get('file_size', ''),
+        "md_first_seen": parse_date(md_data.get('first_seen', '')),
+        "md_last_analysis_date": parse_date(md_data.get('last_seen', '')),
+        "md_malware_families": ', '.join(md_data.get('last_av_scan', {}).get('malware_families', [])),
+    }
+
 def dissect_ha_data(ha_data):
     if not ha_data or len(ha_data) == 0:
         return {}
@@ -33,7 +73,6 @@ def dissect_ha_data(ha_data):
 
     return {
         "ha_hash": result.get('sha256', ''),
-        "ha_verdict": result.get('verdict', ''),
         "ha_submission_date": parse_date(submission_date),
         "ha_file_type": result.get('type', ''),
         "ha_analysis_start_time": parse_date(result.get('analysis_start_time', '')),
@@ -50,8 +89,7 @@ def dissect_mb_data(mb_data):
         "mb_hash": result.get('sha256_hash', ''),
         "mb_file_name": result.get('file_name', ''),
         "mb_file_type": result.get('file_type', ''),
-        "mb_first_submission_date": parse_date(result.get('first_seen', '')),
-        "mb_tags": ', '.join(result.get('tags', []))
+        "mb_first_submission_date": parse_date(result.get('first_seen', ''))
     }
     
 def dissect_vt_data(vt_data):
@@ -62,12 +100,9 @@ def dissect_vt_data(vt_data):
 
     return {
         "vt_hash": vt_data['data']['id'],
-        "vt_reputation": attributes.get("reputation"),
         "vt_first_submission_date": parse_date(attributes.get("first_submission_date")),
         "vt_last_analysis_date": parse_date(attributes.get("last_analysis_date")),
         "vt_last_modification_date": parse_date(attributes.get("last_modification_date")),
-        "vt_total_votes_harmless": attributes.get("total_votes", {}).get("harmless"),
-        "vt_total_votes_malicious": attributes.get("total_votes", {}).get("malicious"),
         "vt_antiy_result": attributes.get('last_analysis_results', {}).get('Antiy-AVL', {}).get('result'),
         "vt_antiy_category": attributes.get('last_analysis_results', {}).get('Antiy-AVL', {}).get('category')
     }
@@ -167,25 +202,45 @@ def save_to_csv(data, filename):
 
     print(f"Data has been appended to {filename}.")
 
-def save_hash(vt_data, ha_data, mb_data, filename):
+def save_hash(vt_data, ha_data, mb_data, av_data, ms_data, md_data, filename):
     vt_ioc = dissect_vt_data(vt_data)
     ha_ioc = dissect_ha_data(ha_data)
     mb_ioc = dissect_mb_data(mb_data)
+    av_ioc = dissect_alienvault_data(av_data)
+    ms_ioc = dissect_malshare_data(ms_data)
+    md_ioc = dissect_metadefender_data(md_data)
     
     merged_data = {
-        "vt_hash": vt_ioc.get("vt_hash"),
-        "ha_hash": ha_ioc.get("ha_hash"),
-        "mb_hash": mb_ioc.get("mb_hash"),
         **vt_ioc,
         **ha_ioc,
-        **mb_ioc
+        **mb_ioc,
+        **av_ioc,
+        **ms_ioc,
+        **md_ioc
     }
+    
+    ordering = [
+        # Hash values
+        "vt_hash", "ha_hash", "mb_hash", "av_hash", "ms_hash", "md_hash",
+        
+        # File metadata
+        "ha_submit_name", "mb_file_name", "ms_filenames", "md_file_type", "av_file_type", "ms_file_type",
 
-    if not merged_data:
+        # Malware information
+        "mb_file_type", "md_malware_families", "av_total_positives", "av_total_scans",
+        
+        # Submission and analysis dates
+        "vt_first_submission_date", "ha_submission_date", "mb_first_submission_date", "md_first_seen",
+        "vt_last_analysis_date", "ha_analysis_start_time", "md_last_analysis_date", "av_last_analysis_date"
+    ]
+    
+    ordered_data = {key: merged_data.get(key, '') for key in ordering}
+
+    if not any(ordered_data.values()):
         print("No data to save.")
         return
 
-    save_to_csv(merged_data, filename)
+    save_to_csv(ordered_data, filename)
 
 def save_url(vt_url_data, whois_data, filename):
     vt_url_ioc = dissect_vt_url_data(vt_url_data)

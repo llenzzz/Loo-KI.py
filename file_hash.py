@@ -47,6 +47,12 @@ def api_request(service, url, headers=None, data=None):
             headers.update({'apikey': api_key})
             response = requests.get(url+data, headers=headers)
 
+        elif service == 'intezer':
+            response = requests.post(url + '/get-access-token', json={'api_key': api_key})
+            result = response.json().get('result')
+            headers.update({'Authorization': f'Bearer {result}'})
+            response = requests.get(url + '/files/' + data, headers=headers)
+
         if response.status_code == 200:
             return response.json()
         else:
@@ -77,11 +83,14 @@ def alienvault(file_hash):
 
 def malshare(file_hash):
     url = "https://malshare.com/api.php?api_key="
-    data = file_hash
-    return api_request("malshare", url, None, data)
+    return api_request("malshare", url, None, file_hash)
 
 def metadefender(file_hash):
     url = "https://api.metadefender.com/v5/threat-intel/file-analysis/"
     headers = {}
-    data = file_hash
-    return api_request("metadefender", url, headers, data)
+    return api_request("metadefender", url, headers, file_hash)
+
+def intezer(file_hash):
+    url = 'https://analyze.intezer.com/api/v2-0'
+    headers = {'Accept': 'application/json'}
+    return api_request("intezer", url, headers, file_hash)

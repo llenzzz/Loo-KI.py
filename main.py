@@ -35,8 +35,16 @@ def process_hash(item):
     av_data = file_hash.alienvault(item)
     ms_data = file_hash.malshare(item)
     md_data = file_hash.metadefender(item)
-    if vt_data or ha_data or mb_data or av_data or ms_data or md_data:
-        export_csv.save_hash(vt_data, ha_data, mb_data, av_data, ms_data, md_data, f"Hash_Lookups.csv")
+    intezer_data = file_hash.intezer(item)
+    if vt_data or ha_data or mb_data or av_data or ms_data or md_data or intezer_data:
+        export_csv.save_hash(vt_data, 
+                             ha_data, 
+                             mb_data, 
+                             av_data, 
+                             ms_data, 
+                             md_data, 
+                             intezer_data, 
+                             f"Hash_Lookups.csv")
 
 def process_url(item):
     vt_data = url.virustotal(item)

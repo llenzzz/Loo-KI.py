@@ -19,6 +19,20 @@ def parse_date(timestamp):
 
 # Hash Lookup Functions:
 
+def dissect_intezer_data(intezer_data):
+    if not intezer_data or 'result' not in intezer_data:
+        return {}
+
+    result = intezer_data['result']
+
+    return {
+        "intezer_hash": result.get('sha256', ''),
+        "intezer_analysis_id": result.get('analysis_id', ''),
+        "intezer_analysis_date": parse_date(result.get('analysis_time', '')),
+        "intezer_verdict": result.get('verdict', ''),
+        "intezer_family_name": result.get('family_name', ''),
+    }
+
 def dissect_alienvault_data(av_data):
     if not av_data or 'analysis' not in av_data:
         return {}
@@ -217,13 +231,14 @@ def save_to_csv(data, filename):
 
     print(f"Data has been appended to {filename}.")
 
-def save_hash(vt_data, ha_data, mb_data, av_data, ms_data, md_data, filename):
+def save_hash(vt_data, ha_data, mb_data, av_data, ms_data, md_data, intezer_data, filename):
     vt_ioc = dissect_vt_data(vt_data)
     ha_ioc = dissect_ha_data(ha_data)
     mb_ioc = dissect_mb_data(mb_data)
     av_ioc = dissect_alienvault_data(av_data)
     ms_ioc = dissect_malshare_data(ms_data)
     md_ioc = dissect_metadefender_data(md_data)
+    intezer_ioc = dissect_intezer_data(intezer_data)
     
     merged_data = {
         **vt_ioc,
@@ -231,22 +246,23 @@ def save_hash(vt_data, ha_data, mb_data, av_data, ms_data, md_data, filename):
         **mb_ioc,
         **av_ioc,
         **ms_ioc,
-        **md_ioc
+        **md_ioc,
+        **intezer_ioc
     }
     
     ordering = [
         # Hash values
-        "vt_hash", "ha_hash", "mb_hash", "av_hash", "ms_hash", "md_hash",
+        "vt_hash", "ha_hash", "mb_hash", "av_hash", "ms_hash", "md_hash", "intezer_hash",
         
         # File metadata
         "ha_submit_name", "mb_file_name", "ms_filenames", "md_file_type", "av_file_type", "ms_file_type",
 
         # Malware information
-        "mb_file_type", "md_malware_families", "av_total_positives", "av_total_scans",
+        "mb_file_type", "md_malware_families", "av_total_positives", "av_total_scans", "intezer_verdict", "intezer_family_name",
         
         # Submission and analysis dates
         "vt_first_submission_date", "ha_submission_date", "mb_first_submission_date", "md_first_seen",
-        "vt_last_analysis_date", "ha_analysis_start_time", "md_last_analysis_date", "av_last_analysis_date"
+        "vt_last_analysis_date", "ha_analysis_start_time", "md_last_analysis_date", "av_last_analysis_date", "intezer_analysis_date"
     ]
     
     ordered_data = {key: merged_data.get(key, '') for key in ordering}

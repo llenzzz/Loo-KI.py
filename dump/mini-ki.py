@@ -3,6 +3,7 @@ import requests
 from dotenv import load_dotenv
 import csv
 from datetime import datetime
+import re
 
 REG_HASH = r'\b[a-fA-F0-9]{32}\b|\b[a-fA-F0-9]{40}\b|\b[a-fA-F0-9]{64}\b'
 REG_URL = r'^(https?://)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(/.*)?$'

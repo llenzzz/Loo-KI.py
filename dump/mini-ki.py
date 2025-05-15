@@ -4,6 +4,17 @@ from dotenv import load_dotenv
 import csv
 from datetime import datetime
 
+REG_HASH = r'\b[a-fA-F0-9]{32}\b|\b[a-fA-F0-9]{40}\b|\b[a-fA-F0-9]{64}\b'
+REG_URL = r'^(https?://)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(/.*)?$'
+REG_IP = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+
+def init():
+    print("==== MiniKipy ====")
+    print("Select an option:")
+    print("1. Hash/IP/Domain Lookup")
+    print("2. Add API Key")
+    print("0. Exit")
+
 def format_signing_date(date_str):
     if date_str == 'N/A':
         return 'N/A'
@@ -86,26 +97,63 @@ def virustotal(file_hash):
         "Exports": ', '.join(data['data']['attributes']['pe_info'].get('exports', [])),
     }
 
-input_file = "1.txt"
-output_file = "complete-1-signed.csv"
-
-with open(input_file, 'r') as file:
-    hashes = [line.strip() for line in file if line.strip()]
-
-with open(output_file, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.DictWriter(file, fieldnames=[
-        "MD5", "SHA-1", "SHA-256", "File Type", "Magic", "TrID", "File Size",
-        "Creation Time", "First Seen in the Wild", "First Submission", "Last Submission",
-        "Last Analysis Date", "Malicious Flags", "Suspicious Flags", "Undetected Flags",
-        "Harmless Flags", "Timeout Flags", "Confirmed Timeout Flags", "Failure Flags",
-        "Type Unsupported Flags", "Names", "Signature Type", "Signing Date", "Copyright", "Product", "Description",
-        "Original Name", "Internal Name", "File Version", "Imports", "Exports"
-    ])
-    writer.writeheader()
+def main():
+    init()
     
-    for hash in hashes:
-        try:
-            csv_data = virustotal(hash)
-            writer.writerow(csv_data)
-        except Exception as e:
-            print(f"[ERROR] {hash}: {e}")
+    while True:
+        choice = input("Enter your choice (0-2): ").strip()
+        
+        if choice == '1':
+            input_file = input("Input .txt file for lookup values: ")
+            input_file = os.path.splitext(input_file)[0] + ".txt"
+
+            try:
+                with open(input_file, 'r') as file:
+                    indicators = [line.strip() for line in file if line.strip()]
+
+                output_file = input("Output .csv file: ")
+                output_file = os.path.splitext(output_file)[0] + ".csv"
+
+                for item in indicators:
+                    try:
+                        if re.fullmatch(REG_HASH, item):
+                            with open(output_file, mode='w', newline='', encoding='utf-8') as file:
+                                writer = csv.DictWriter(file, fieldnames=[
+                                    "MD5", "SHA-1", "SHA-256", "File Type", "Magic", "TrID", "File Size",
+                                    "Creation Time", "First Seen in the Wild", "First Submission", "Last Submission",
+                                    "Last Analysis Date", "Malicious Flags", "Suspicious Flags", "Undetected Flags",
+                                    "Harmless Flags", "Timeout Flags", "Confirmed Timeout Flags", "Failure Flags",
+                                    "Type Unsupported Flags", "Names", "Signature Type", "Signing Date", "Copyright",
+                                    "Product", "Description", "Original Name", "Internal Name", "File Version",
+                                    "Imports", "Exports"
+                                ])
+                                writer.writeheader()
+                            csv_data = virustotal(item)
+                            writer.writerow(csv_data)
+                        elif re.fullmatch(REG_IP, item):
+                            print(f"[PLACEHOLDER] IP Lookup for {item}")
+                        elif re.fullmatch(REG_URL, item):
+                            print(f"[PLACEHOLDER] Domain Lookup for {item}")
+                        else:
+                            print(f"[SKIPPED] Could not classify: {item}")
+                            
+                    except Exception as e:
+                        print(f"[ERROR] {item}: {e}")
+
+                print(f"Lookup completed. Output saved to '{output_file}'.")
+
+            except FileNotFoundError:
+                print(f"[ERROR] Input file '{input_file}' not found.")
+
+        elif choice == '2':
+            print("[PLACEHOLDER] Add API Key functionality coming soon.")
+
+        elif choice == '0':
+            print("Exiting...")
+            break
+
+        else:
+            print("Invalid choice. Please enter a number between 0 and 2.")
+
+if __name__ == "__main__":
+    main()

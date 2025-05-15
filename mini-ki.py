@@ -4,6 +4,17 @@ from dotenv import load_dotenv
 import csv
 from datetime import datetime
 
+def format_signing_date(date_str):
+    if date_str == 'N/A':
+        return 'N/A'
+    try:
+        # Parse the input string
+        parsed_date = datetime.strptime(date_str, "%I:%M %p %m/%d/%Y")
+        # Format it to the desired output format
+        return parsed_date.strftime("%Y-%m-%d %H:%M:%S UTC")
+    except ValueError:
+        return 'Invalid date format'
+
 def convert_unix_to_utc(timestamp):
     try:
         return datetime.utcfromtimestamp(int(timestamp)).strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -63,6 +74,8 @@ def virustotal(file_hash):
         "Failure Flags": data['data']['attributes']['last_analysis_stats']['failure'],
         "Type Unsupported Flags": data['data']['attributes']['last_analysis_stats']['type-unsupported'],
         "Names": ', '.join(data['data']['attributes']['names']),
+        "Signature Type": data['data']['attributes']['signature_info'].get('verified', 'Not Signed'),
+        "Signing Date": format_signing_date(data['data']['attributes']['signature_info'].get('signing date', 'N/A')),
         "Copyright": data['data']['attributes']['signature_info'].get('copyright', 'N/A'),
         "Product": data['data']['attributes']['signature_info'].get('product', 'N/A'),
         "Description": data['data']['attributes']['signature_info'].get('description', 'N/A'),
@@ -73,8 +86,8 @@ def virustotal(file_hash):
         "Exports": ', '.join(data['data']['attributes']['pe_info'].get('exports', [])),
     }
 
-input_file = "input.txt"
-output_file = "output.csv"
+input_file = "1.txt"
+output_file = "complete-1-signed.csv"
 
 with open(input_file, 'r') as file:
     hashes = [line.strip() for line in file if line.strip()]
@@ -85,7 +98,7 @@ with open(output_file, mode='w', newline='', encoding='utf-8') as file:
         "Creation Time", "First Seen in the Wild", "First Submission", "Last Submission",
         "Last Analysis Date", "Malicious Flags", "Suspicious Flags", "Undetected Flags",
         "Harmless Flags", "Timeout Flags", "Confirmed Timeout Flags", "Failure Flags",
-        "Type Unsupported Flags", "Names", "Copyright", "Product", "Description",
+        "Type Unsupported Flags", "Names", "Signature Type", "Signing Date", "Copyright", "Product", "Description",
         "Original Name", "Internal Name", "File Version", "Imports", "Exports"
     ])
     writer.writeheader()
